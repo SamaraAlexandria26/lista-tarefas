@@ -66,6 +66,13 @@ function App() {
       return;
     }
 
+    if (!supabase) {
+      console.warn('Supabase não configurado. Usando tarefas demo locais.');
+      setTasks(initialDemoTasks.map((task, i) => ({ ...task, id: `demo-${i}` })));
+      setLoading(false);
+      return;
+    }
+
     const fetchTasks = async () => {
       setLoading(true);
       try {
@@ -140,6 +147,7 @@ function App() {
     );
 
     try {
+      if (!supabase) return;
       const { error } = await supabase
         .from('tasks')
         .update({ completed: newCompletedState })
@@ -168,6 +176,7 @@ function App() {
     }
 
     try {
+      if (!supabase) return;
       const { error } = await supabase
         .from('tasks')
         .delete()
@@ -195,6 +204,7 @@ function App() {
       setEditingTask(null);
 
       try {
+        if (!supabase) return;
         const { error } = await supabase
           .from('tasks')
           .update({
@@ -220,6 +230,11 @@ function App() {
     } else {
       // Criar nova
       try {
+        if (!supabase) {
+          const localTask = { ...taskData, id: `demo-${Date.now()}`, completed: false, createdAt: new Date().toISOString() };
+          setTasks(prevTasks => [localTask, ...prevTasks]);
+          return;
+        }
         const newTaskDb = {
           title: taskData.title,
           category: taskData.category,
